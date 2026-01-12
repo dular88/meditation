@@ -11,11 +11,9 @@
     <link rel="stylesheet" href="../assets/fa/css/font-awesome.min.css">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 </head>
 <body>
 
-<!-- Sidebar -->
 <?php include_once "sidebar.php"; ?>
 
 <div class="content p-4">
@@ -35,9 +33,9 @@
                     <tr>
                         <th>#</th>
                         <th>Name</th>
-                        <th>Address</th>
-                        <th>State</th>
                         <th>City</th>
+                        <th>Area</th>
+                        <th>Address</th>
                         <th>Contact</th>
                         <th width="140">Actions</th>
                     </tr>
@@ -64,25 +62,24 @@
 
                     <input type="hidden" id="meditatorId">
 
-                   <div class="mb-3">
+                    <div class="mb-3">
                         <label>Name</label>
                         <input type="text" id="name" class="form-control" required>
                     </div>
 
-                   <div class="mb-3">
-                    <label>State</label>
-                    <select id="state_id" class="form-control" required>
-                        <option value="">Select State</option>
-                    </select>
-                </div>
+                    <div class="mb-3">
+                        <label>City</label>
+                        <select id="city_id" class="form-control" required>
+                            <option value="">Select City</option>
+                        </select>
+                    </div>
 
-                <div class="mb-3">
-                    <label>City</label>
-                    <select id="city_id" class="form-control" required>
-                        <option value="">Select City</option>
-                    </select>
-                </div>
-
+                    <div class="mb-3">
+                        <label>Area</label>
+                        <select id="area_id" class="form-control" required>
+                            <option value="">Select Area</option>
+                        </select>
+                    </div>
 
                     <div class="mb-3">
                         <label>Address</label>
@@ -109,38 +106,9 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-
-// ================= LOAD STATES =================
-function loadStates(selectedState = "", selectedCity = "") {
-    $.post("crud/state_city_api.php", { action: "states" }, function (states) {
-
-        let html = `<option value="">Select State</option>`;
-        states.forEach(s => {
-            html += `<option value="${s.id}" ${s.id == selectedState ? 'selected' : ''}>${s.name}</option>`;
-        });
-
-        $("#state_id").html(html);
-
-        // 👉 If editing, load cities AFTER states
-        if (selectedState) {
-            loadCities(selectedState, selectedCity);
-        }
-
-    }, "json");
-}
-
 // ================= LOAD CITIES =================
-function loadCities(state_id, selectedCity = "") {
-
-    if (!state_id) {
-        $("#city_id").html(`<option value="">Select City</option>`);
-        return;
-    }
-
-    $.post("crud/state_city_api.php", {
-        action: "cities",
-        state_id: state_id
-    }, function (cities) {
+function loadCities(selectedCity = "") {
+    $.post("crud/city_area_api.php", { action: "get_cities" }, function (cities) {
 
         let html = `<option value="">Select City</option>`;
         cities.forEach(c => {
@@ -148,13 +116,34 @@ function loadCities(state_id, selectedCity = "") {
         });
 
         $("#city_id").html(html);
-
     }, "json");
 }
 
-// ================= STATE CHANGE =================
-$("#state_id").on("change", function () {
-    loadCities(this.value);
+// ================= LOAD AREAS =================
+function loadAreas(city_id, selectedArea = "") {
+
+    if (!city_id) {
+        $("#area_id").html(`<option value="">Select Area</option>`);
+        return;
+    }
+
+    $.post("crud/city_area_api.php", {
+        action: "get_areas",
+        city_id: city_id
+    }, function (areas) {
+
+        let html = `<option value="">Select Area</option>`;
+        areas.forEach(a => {
+            html += `<option value="${a.id}" ${a.id == selectedArea ? 'selected' : ''}>${a.name}</option>`;
+        });
+
+        $("#area_id").html(html);
+    }, "json");
+}
+
+// ================= CITY CHANGE =================
+$("#city_id").on("change", function () {
+    loadAreas(this.value);
 });
 
 // ================= LOAD LIST =================
@@ -169,9 +158,9 @@ function loadMeditators() {
             <tr>
                 <td>${i++}</td>
                 <td>${row.name}</td>
-                <td>${row.address}</td>
-                <td>${row.state}</td>
                 <td>${row.city}</td>
+                <td>${row.area}</td>
+                <td>${row.address}</td>
                 <td>${row.contact}</td>
                 <td>
                     <button class="btn btn-sm btn-warning editBtn" data-id="${row.id}">Edit</button>
@@ -181,19 +170,19 @@ function loadMeditators() {
         });
 
         $("#meditatorsTable").html(rows);
-
     }, "json");
 }
 loadMeditators();
 
 // ================= ADD =================
 $("#addMeditatorBtn").click(function () {
+
     $("#modalTitle").text("Add Meditator");
     $("#meditatorForm")[0].reset();
     $("#meditatorId").val("");
 
-    loadStates(); // fresh load
-    $("#city_id").html(`<option value="">Select City</option>`);
+    loadCities();
+    $("#area_id").html(`<option value="">Select Area</option>`);
 
     $("#meditatorModal").modal("show");
 });
@@ -212,8 +201,8 @@ $(document).on("click", ".editBtn", function () {
         $("#address").val(data.address);
         $("#contact").val(data.contact);
 
-        // ✅ Correct loading order
-        loadStates(data.state_id, data.city_id);
+        loadCities(data.city_id);
+        loadAreas(data.city_id, data.area_id);
 
         $("#meditatorModal").modal("show");
 
@@ -228,8 +217,8 @@ $("#meditatorForm").submit(function (e) {
         action: "save",
         id: $("#meditatorId").val(),
         name: $("#name").val(),
-        state_id: $("#state_id").val(),
         city_id: $("#city_id").val(),
+        area_id: $("#area_id").val(),
         address: $("#address").val(),
         contact: $("#contact").val()
     }, function (res) {
@@ -264,10 +253,7 @@ function showAlert(msg, success) {
     `);
     setTimeout(() => $("#alertBox").html(""), 2000);
 }
-
 </script>
-
-
 
 </body>
 </html>

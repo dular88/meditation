@@ -8,10 +8,13 @@ if (!isset($_GET['id'])) {
 $id = (int)$_GET['id'];
 
 $q = mysqli_query($conn, "
-    SELECT c.*, s.name AS state, ci.name AS city
+   SELECT 
+        c.*,
+        ci.name AS city,
+        a.name AS area
     FROM meditation_centers c
-    JOIN states s ON s.id = c.state_id
     JOIN cities ci ON ci.id = c.city_id
+    LEFT JOIN areas a ON a.id = c.area_id
     WHERE c.id = $id
 ");
 
@@ -55,7 +58,7 @@ if (!$center) {
     <div class="container">
         <h1 class="fw-bold"><?= htmlspecialchars($center['center_name']) ?></h1>
         <p class="mt-2">
-            <?= htmlspecialchars($center['city']) ?>, <?= htmlspecialchars($center['state']) ?>
+            <?= htmlspecialchars($center['area']) ?>, <?= htmlspecialchars($center['city']) ?> Chhattisgarh
         </p>
     </div>
 </section>
@@ -86,8 +89,8 @@ if (!$center) {
             </p>
 
             <div class="mb-3 icon-box">
-                <strong>City:</strong> <?= htmlspecialchars($center['city']) ?><br>
-                <strong>State:</strong> <?= htmlspecialchars($center['state']) ?>
+                <strong>Area:</strong> <?= htmlspecialchars($center['area']) ?><br>
+                <strong>City:</strong> <?= htmlspecialchars($center['city']) ?>
             </div>
 
             <?php if (!empty($center['contact_number'])) { ?>

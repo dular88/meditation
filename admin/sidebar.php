@@ -8,9 +8,9 @@
     <a href="books.php"><i class="fa fa-book" aria-hidden="true"></i> Books</a>
     <?php if($_SESSION['role'] === "admin"){ ?>
     <a href="users.php"><i class="fa fa-book" aria-hidden="true"></i> Users</a>
-    <a href="states.php"><i class="fa fa-location-arrow" aria-hidden="true"></i>
- State</a>
-    <a href="city.php"><i class="fa fa-map-marker" aria-hidden="true"></i> City</a>
+    <a href="city.php"><i class="fa fa-location-arrow" aria-hidden="true"></i>
+ City</a>
+    <a href="area.php"><i class="fa fa-map-marker" aria-hidden="true"></i> Area</a>
         <?php } ?>
     <hr>
 

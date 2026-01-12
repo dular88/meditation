@@ -36,7 +36,7 @@
 <!-- ================= HERO ================= -->
 <section class="hero text-center">
     <div class="container">
-        <h1 class="fw-bold">Our Meditation Centers</h1>
+        <h1 class="fw-bold">Our Meditation Centers in Chhattisgarh</h1>
         <p class="mt-3">
             Experience deep peace and spiritual energy at our pyramid
             meditation centers spread across different states and cities.
@@ -45,7 +45,7 @@
 </section>
 
 <!-- ================= INTRO ================= -->
-<section class="z-box text-center">
+<section class="text-center">
     <div class="container">
         <h2 class="fw-bold">Sacred Spaces for Inner Transformation</h2>
         <p class="mt-3">
@@ -56,18 +56,18 @@
     </div>
 </section>
 <!-- ================= FILTER ================= -->
-<section class="z-box bg-soft">
+<section class="bg-soft">
 <div class="container">
 
 <form class="row g-3 align-items-end">
 
     <div class="col-md-4">
-        <label class="form-label fw-semibold">State</label>
-        <select id="state_id" class="form-select">
-            <option value="">Select State</option>
+        <label class="form-label fw-semibold">City</label>
+        <select id="city_id" class="form-select">
+            <option value="">Select City</option>
             <?php
-            $states = mysqli_query($conn,"SELECT id,name FROM states ORDER BY name");
-            while($s=mysqli_fetch_assoc($states)){
+            $cities = mysqli_query($conn,"SELECT id,name FROM cities ORDER BY name");
+            while($s=mysqli_fetch_assoc($cities)){
                 echo "<option value='{$s['id']}'>{$s['name']}</option>";
             }
             ?>
@@ -75,9 +75,9 @@
     </div>
 
     <div class="col-md-4">
-        <label class="form-label fw-semibold">City</label>
-        <select id="city_id" class="form-select" disabled>
-            <option value="">Select City</option>
+        <label class="form-label fw-semibold">Area</label>
+        <select id="area_id" class="form-select" disabled>
+            <option value="">Select Area</option>
         </select>
     </div>
 
@@ -120,27 +120,62 @@ $(function(){
     // Load all centers on page load
     loadCenters();
 
-    // State change → Load cities
-    $("#state_id").change(function(){
-        let state_id = $(this).val();
+    // City change → Load areas
+    $("#city_id").change(function(){
 
-        $("#city_id")
-            .html('<option value="">Select City</option>')
-            .prop("disabled", true);
+    let city_id = $(this).val();
 
-        if(!state_id){
-            loadCenters();
-            return;
+    $("#area_id")
+        .html('<option value="">Select Area</option>')
+        .prop("disabled", true);
+
+    if(!city_id){
+        loadCenters();
+        return;
+    }
+
+    $.ajax({
+        url: "admin/crud/city_area_api.php",
+        type: "POST",
+        dataType: "json",
+        data: {
+            action: "get_areas",   // ✅ REQUIRED
+            city_id: city_id
+        },
+        success: function(res){
+
+    let html = '<option value="">Select Area</option>';
+
+    // ✅ SAFETY CHECK (MOST IMPORTANT)
+    if (!Array.isArray(res)) {
+        console.error("Area API response error:", res);
+        html += '<option value="">No areas found</option>';
+        $("#area_id").html(html).prop("disabled", true);
+        return;
+    }
+
+    if (res.length === 0) {
+        html += '<option value="">No areas found</option>';
+    } else {
+        res.forEach(a => {
+            html += `<option value="${a.id}">${a.name}</option>`;
+        });
+    }
+
+    $("#area_id").html(html).prop("disabled", false);
+}
+,
+        error: function(){
+            alert("Failed to load areas");
         }
+    });
 
-        $.post("ajax/get_cities.php",{state_id},function(res){
-            let html = '<option value="">Select City</option>';
-            res.forEach(c=>{
-                html += `<option value="${c.id}">${c.name}</option>`;
-            });
-            $("#city_id").html(html).prop("disabled", false);
-        },"json");
+    loadCenters();
+});
 
+
+    // Area change → reload centers
+    $("#area_id").change(function(){
         loadCenters();
     });
 
@@ -151,19 +186,16 @@ $(function(){
 
     function loadCenters(){
         $.post("ajax/filter_centers.php",{
-            state_id: $("#state_id").val(),
-            city_id: $("#city_id").val()
+            city_id: $("#city_id").val(),
+            area_id: $("#area_id").val()
         },function(html){
             $("#centersResult").html(html);
         });
     }
 
-    $("#city_id").on("change", function () {
-    loadCenters();
-});
-
 });
 </script>
+
 
 </body>
 </html>

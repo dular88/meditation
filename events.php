@@ -5,7 +5,7 @@ include "dbcon.php";
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Events | Ekta Pyramid Spiritual Trust</title>
+<title>Events | Ekta Pyramid Spiritual Society</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link href="assets/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -53,26 +53,25 @@ include "dbcon.php";
 <form class="row g-3 align-items-end">
 
     <div class="col-md-3">
-        <label class="form-label fw-semibold">State</label>
-        <select id="state_id" class="form-select">
-            <option value="">All States</option>
+        <label class="form-label fw-semibold">City</label>
+        <select id="city_id" class="form-select">
+            <option value="">All Cities</option>
             <?php
-            $states = mysqli_query($conn,"SELECT id,name FROM states ORDER BY name");
-            while($s=mysqli_fetch_assoc($states)){
-                echo "<option value='{$s['id']}'>{$s['name']}</option>";
+            $cities = mysqli_query($conn,"SELECT id,name FROM cities ORDER BY name");
+            while($c=mysqli_fetch_assoc($cities)){
+                echo "<option value='{$c['id']}'>{$c['name']}</option>";
             }
             ?>
         </select>
     </div>
 
     <div class="col-md-3">
-        <label class="form-label fw-semibold">City</label>
-        <select id="city_id" class="form-select" disabled>
-            <option value="">All Cities</option>
+        <label class="form-label fw-semibold">Area</label>
+        <select id="area_id" class="form-select" disabled>
+            <option value="">All Areas</option>
         </select>
     </div>
 
-    <!-- ✅ NEW EVENT TYPE -->
     <div class="col-md-3">
         <label class="form-label fw-semibold">Event Type</label>
         <select id="event_type" class="form-select">
@@ -90,7 +89,6 @@ include "dbcon.php";
     </div>
 
 </form>
-
 
 </div>
 </section>
@@ -120,43 +118,74 @@ $(function(){
 
     loadEvents();
 
-    // Load cities when state changes
-    $("#state_id").change(function(){
-        let state_id = $(this).val();
+    // ----------------------
+    // Load areas when city changes
+    // ----------------------
+    $("#city_id").change(function(){
 
-        $("#city_id").html('<option value="">All Cities</option>')
-                     .prop("disabled", true);
+        let city_id = $(this).val();
 
-        if(!state_id){
+        $("#area_id")
+            .html('<option value="">All Areas</option>')
+            .prop("disabled", true);
+
+        if(!city_id){
             loadEvents();
             return;
         }
 
-        $.post("ajax/get_cities.php",{state_id},function(res){
-            let html = '<option value="">All Cities</option>';
-            res.forEach(c=>{
-                html += `<option value="${c.id}">${c.name}</option>`;
-            });
-            $("#city_id").html(html).prop("disabled", false);
-        },"json");
+        $.ajax({
+            url: "admin/crud/city_area_api.php",
+            type: "POST",
+            dataType: "json",
+            data: {
+                action: "get_areas",
+                city_id: city_id
+            },
+            success: function(res){
+
+                let html = '<option value="">All Areas</option>';
+
+                if(!Array.isArray(res) || res.length === 0){
+                    html += '<option value="">No areas found</option>';
+                    $("#area_id").html(html).prop("disabled", true);
+                    return;
+                }
+
+                res.forEach(a=>{
+                    html += `<option value="${a.id}">${a.name}</option>`;
+                });
+
+                $("#area_id").html(html).prop("disabled", false);
+            },
+            error: function(){
+                alert("Failed to load areas");
+            }
+        });
 
         loadEvents();
     });
 
-    $("#filterBtn").click(function(){
+    // ----------------------
+    // Reload events when area or filter button changes
+    // ----------------------
+    $("#area_id, #filterBtn").click(function(){
         loadEvents();
     });
 
-function loadEvents(){
-    $.post("ajax/filter_events.php",{
-        state_id: $("#state_id").val(),
-        city_id: $("#city_id").val(),
-        event_type: $("#event_type").val() // ✅ NEW
-    },function(html){
-        $("#eventsResult").html(html);
+    $("#area_id").change(function(){
+        loadEvents();
     });
-}
 
+    function loadEvents(){
+        $.post("ajax/filter_events.php",{
+            city_id: $("#city_id").val(),
+            area_id: $("#area_id").val(),
+            event_type: $("#event_type").val()
+        },function(html){
+            $("#eventsResult").html(html);
+        });
+    }
 
 });
 </script>

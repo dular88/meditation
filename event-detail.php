@@ -16,22 +16,38 @@ SELECT
     mc.contact_number,
     mc.email,
     mc.google_map_url,
-    s.name AS state,
-    c.name AS city
+    ci.name AS city,
+    a.name AS area
 FROM events e
 JOIN meditation_centers mc ON mc.id = e.center_id
-JOIN states s ON s.id = mc.state_id
-JOIN cities c ON c.id = mc.city_id
-WHERE e.id = $event_id
+JOIN cities ci ON ci.id = mc.city_id
+LEFT JOIN areas a ON a.id = mc.area_id
+WHERE e.id = ?
 ";
 
-$q = mysqli_query($conn, $sql);
-$event = mysqli_fetch_assoc($q);
+// Prepare statement
+$stmt = $conn->prepare($sql);
+if (!$stmt) {
+    die("Prepare failed: " . $conn->error);
+}
 
+$stmt->bind_param("i", $event_id);
+$stmt->execute();
+
+$result = $stmt->get_result();
+if (!$result) {
+    die("Query failed: " . $stmt->error);
+}
+
+$event = $result->fetch_assoc();
 if (!$event) {
     die("Event not found");
 }
+
+$stmt->close();
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -65,9 +81,9 @@ if (!$event) {
 <!-- ================= HERO ================= -->
 <section class="hero text-center">
     <div class="container">
-        <h1 class="fw-bold"><?= htmlspecialchars($event['name']) ?></h1>
+        <h1 class="fw-bold"><?= ucwords(htmlspecialchars($event['name'])) ?></h1>
         <p class="mt-2">
-            📍 <?= $event['city'] ?>, <?= $event['state'] ?>
+            📍 <?= $event['area'] ?>, <?= $event['city'] ?> Chhattisgarh
         </p>
     </div>
 </section>
@@ -120,7 +136,7 @@ if (!$event) {
             <p class="mb-1"><?= htmlspecialchars($event['center_name']) ?></p>
             <p class="small text-muted">
                 <?= htmlspecialchars($event['address']) ?><br>
-                <?= htmlspecialchars($event['city']) ?>, <?= htmlspecialchars($event['state']) ?>
+                <?= htmlspecialchars($event['area']) ?>, <?= htmlspecialchars($event['city']) ?> Chhattisgarh
             </p>
 
             <?php if (!empty($event['contact_number'])) { ?>
@@ -137,6 +153,15 @@ if (!$event) {
                    📍 View on Map
                 </a>
             <?php } ?>
+            <?php if (!empty($event['link'])) { ?>
+    <a href="<?= htmlspecialchars($event['link']) ?>"
+       target="_blank"
+       rel="noopener noreferrer"
+       class="btn btn-outline-success btn-sm w-100 mt-2">
+       🔗 Event Link
+    </a>
+<?php } ?>
+
         </div>
 
         <div class="info-box p-4 text-center">

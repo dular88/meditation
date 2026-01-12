@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // 👉 ADMIN LOGIN (EMAIL)
             $stmt = mysqli_prepare($conn,
-                "SELECT id,name,password,role,status 
+                "SELECT id,name,password,role,city_id,status 
                  FROM users 
                  WHERE email=? AND role='admin' 
                  LIMIT 1"
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // 👉 USER LOGIN (PHONE)
             $stmt = mysqli_prepare($conn,
-                "SELECT id,name,password,role,status 
+                "SELECT id,name,password,role,city_id,status 
                  FROM users 
                  WHERE phone=? AND role!='admin' 
                  LIMIT 1"
@@ -51,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['name']    = $user['name'];
                 $_SESSION['role']    = $user['role'];
+                $_SESSION['city_id']    = $user['city_id'];
 
                 /* Role based redirect */
                 if ($user['role'] === 'admin') {

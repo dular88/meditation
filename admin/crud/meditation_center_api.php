@@ -1,6 +1,9 @@
 <?php
 header("Content-Type: application/json");
 include "../../dbcon.php";
+session_start();
+$city_id = $_SESSION['city_id'];
+$role = $_SESSION['role'];
 
 $action = $_POST['action'] ?? "";
 
@@ -10,7 +13,7 @@ $action = $_POST['action'] ?? "";
 if ($action == "add") {
 
     $center_name = $_POST['center_name'];
-    $state_id = $_POST['state_id'];
+    $area_id = $_POST['area_id'];
     $city_id = $_POST['city_id'];
     $address = $_POST['address'];
     $contact = $_POST['contact_number'];
@@ -21,7 +24,7 @@ if ($action == "add") {
 
 $stmt = $conn->prepare("
     INSERT INTO meditation_centers
-    (center_name, state_id, city_id, address, contact_number,
+    (center_name, area_id, city_id, address, contact_number,
      google_business_url, youtube_url, google_map_url)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 ");
@@ -38,7 +41,7 @@ if (!$stmt) {
     $stmt->bind_param(
         "siisssss",
         $center_name,
-        $state_id,
+        $area_id,
         $city_id,
         $address,
         $contact,
@@ -58,14 +61,25 @@ if ($action == "list") {
 
     $sql = "
         SELECT mc.*,
-               s.name AS state,
-               c.name AS city
+               s.name AS city,
+               c.name AS area
         FROM meditation_centers mc
-        LEFT JOIN states s ON s.id = mc.state_id
-        LEFT JOIN cities c ON c.id = mc.city_id
+        LEFT JOIN cities s ON s.id = mc.city_id
+        LEFT JOIN areas c ON c.id = mc.area_id
         ORDER BY mc.id DESC
     ";
-
+if($role == "manager"){
+     $sql = "
+        SELECT mc.*,
+               s.name AS city,
+               c.name AS area
+        FROM meditation_centers mc
+        LEFT JOIN cities s ON s.id = mc.city_id
+        LEFT JOIN areas c ON c.id = mc.area_id
+        WHERE mc.city_id=".$city_id."
+        ORDER BY mc.id DESC
+    ";
+}
     $result = $conn->query($sql);
 
     if (!$result) {
@@ -103,7 +117,7 @@ if ($action == "update") {
 
     $id = $_POST['id'];
     $center_name = $_POST['center_name'];
-    $state_id = $_POST['state_id'];
+    $area_id = $_POST['area_id'];
     $city_id = $_POST['city_id'];
     $address = $_POST['address'];
     $contact = $_POST['contact_number'];
@@ -115,7 +129,7 @@ if ($action == "update") {
     $stmt = $conn->prepare("
         UPDATE meditation_centers SET
             center_name=?,
-            state_id=?,
+            area_id=?,
             city_id=?,
             address=?,
             contact_number=?,
@@ -128,7 +142,7 @@ if ($action == "update") {
     $stmt->bind_param(
         "siisssssi",
         $center_name,
-        $state_id,
+        $area_id,
         $city_id,
         $address,
         $contact,

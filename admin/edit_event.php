@@ -120,6 +120,21 @@ if (!$centers) {
                     <input type="file" name="photo" class="form-control" accept="image/*">
                 </div>
 
+                <div class="mb-3">
+    <label class="form-label">Event Link</label>
+    <input
+        type="url"
+        name="link"
+        class="form-control"
+        placeholder="https://example.com/event"
+        value="<?= htmlspecialchars($event['link'] ?? ''); ?>"
+    >
+    <small class="text-muted">
+        Optional: Registration / YouTube / Google Meet link
+    </small>
+</div>
+
+
                 <button class="btn btn-warning w-100">Update Event</button>
 
             </form>

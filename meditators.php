@@ -8,6 +8,7 @@ include "dbcon.php";
 <title>Meditators | Ekta Pyramid Spiritual Trust</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="assets/dist/css/bootstrap.min.css" rel="stylesheet">
+
 <style>
 .hero{
     background: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.65)),
@@ -48,30 +49,34 @@ include "dbcon.php";
 <!-- FILTER -->
 <section class="py-4 bg-light border-bottom">
 <div class="container">
-<form class="row g-3 align-items-end">
+<form class="row g-3 align-items-end" id="filterForm">
 
+    <!-- CITY -->
     <div class="col-md-4">
-        <label class="form-label fw-semibold">State</label>
-        <select name="state" class="form-select">
-            <option value="">All States</option>
+        <label class="form-label fw-semibold">City</label>
+        <select id="city_id" class="form-select">
+            <option value="">All Cities</option>
             <?php
-            $states = mysqli_query($conn,"SELECT id,name FROM states ORDER BY name");
-            while($s=mysqli_fetch_assoc($states)){
-                echo "<option value='{$s['id']}'>{$s['name']}</option>";
+            $cities = mysqli_query($conn,"SELECT id,name FROM cities ORDER BY name");
+            while($c=mysqli_fetch_assoc($cities)){
+                echo "<option value='{$c['id']}'>{$c['name']}</option>";
             }
             ?>
         </select>
     </div>
 
+    <!-- AREA -->
     <div class="col-md-4">
-        <label class="form-label fw-semibold">City</label>
-        <select name="city" class="form-select" disabled>
-            <option value="">All Cities</option>
+        <label class="form-label fw-semibold">Area</label>
+        <select id="area_id" class="form-select" disabled>
+            <option value="">All Areas</option>
         </select>
     </div>
 
     <div class="col-md-4">
-        <button type="submit" class="btn btn-success w-100">Apply Filter</button>
+        <button type="submit" class="btn btn-success w-100">
+            Apply Filter
+        </button>
     </div>
 
 </form>
@@ -88,51 +93,68 @@ include "dbcon.php";
 <?php include "includes/footer.php"; ?>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
 <script>
 $(function(){
 
-    // Load meditators initially
     loadMeditators();
 
-    // Load cities dynamically when state changes
-    $('select[name="state"]').change(function(){
-        let state_id = $(this).val();
-        let citySelect = $('select[name="city"]');
+    // City → Load Areas
+    $("#city_id").change(function(){
 
-        citySelect.html('<option value="">All Cities</option>').prop("disabled", true);
+        let city_id = $(this).val();
 
-        if(!state_id){
+        $("#area_id")
+            .html('<option value="">All Areas</option>')
+            .prop("disabled", true);
+
+        if(!city_id){
             loadMeditators();
             return;
         }
 
-        $.post("ajax/get_cities.php",{state_id},function(res){
-            let html = '<option value="">All Cities</option>';
-            res.forEach(c=>{
-                html += `<option value="${c.id}">${c.name}</option>`;
-            });
-            citySelect.html(html).prop("disabled", false);
-        },"json");
+        $.ajax({
+            url: "admin/crud/city_area_api.php",
+            type: "POST",
+            dataType: "json",
+            data: {
+                action: "get_areas",
+                city_id: city_id
+            },
+            success: function(res){
+
+                let html = '<option value="">All Areas</option>';
+
+                if(Array.isArray(res) && res.length){
+                    res.forEach(a=>{
+                        html += `<option value="${a.id}">${a.name}</option>`;
+                    });
+                    $("#area_id").html(html).prop("disabled", false);
+                }
+            }
+        });
 
         loadMeditators();
     });
 
-    // Filter form submit
-    $('form').submit(function(e){
+    // Filter submit
+    $("#filterForm").submit(function(e){
         e.preventDefault();
         loadMeditators();
     });
 
     function loadMeditators(){
         $.post("ajax/filter_meditators.php",{
-            state_id: $('select[name="state"]').val(),
-            city_id: $('select[name="city"]').val()
+            city_id: $("#city_id").val(),
+            area_id: $("#area_id").val(),
+              action: "list",
         },function(html){
-            $('#meditatorsResult').html(html);
+            $("#meditatorsResult").html(html);
         });
     }
 
 });
 </script>
+
 </body>
 </html>

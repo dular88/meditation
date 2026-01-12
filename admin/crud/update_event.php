@@ -14,6 +14,8 @@ $center_id  = intval($_POST['center_id']); // ✅ ADDED
 $start_date = trim($_POST['start_date']);
 $end_date   = trim($_POST['end_date']);
 $details    = trim($_POST['details']);
+$link = trim($_POST['link'] ?? '');
+
 $old_photo  = $_POST['old_photo'];
 
 $photo_path = $old_photo;
@@ -49,18 +51,26 @@ if (!empty($_FILES['photo']['name'])) {
 
 // ✅ UPDATE QUERY WITH CENTER ID
 $sql = "UPDATE events 
-        SET name=?, center_id=?, start_date=?, end_date=?, details=?, photo=? 
+        SET name=?, 
+            center_id=?, 
+            start_date=?, 
+            end_date=?, 
+            details=?, 
+            link=?, 
+            photo=?
         WHERE id=?";
+
 
 $stmt = mysqli_prepare($conn, $sql);
 mysqli_stmt_bind_param(
     $stmt,
-    "sissssi",
+    "sisssssi",
     $name,
     $center_id,
     $start_date,
     $end_date,
     $details,
+    $link,
     $photo_path,
     $id
 );

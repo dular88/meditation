@@ -2,6 +2,9 @@
  include_once "auth.php"; 
 
 include_once "../dbcon.php";
+/* fetch cities */
+$cities = mysqli_query($conn, "SELECT id, name FROM cities ORDER BY name");
+
 /* ❌ block non-admin */
 if ($_SESSION['role'] !== 'admin') {
     header("Location: dashboard.php");
@@ -10,8 +13,13 @@ if ($_SESSION['role'] !== 'admin') {
 
 /* fetch users except admin */
 $users = mysqli_query($conn,
-    "SELECT * FROM users WHERE role != 'admin' ORDER BY id DESC"
+    "SELECT u.*, c.name AS city_name
+     FROM users u
+     LEFT JOIN cities c ON c.id = u.city_id
+     WHERE u.role != 'admin'
+     ORDER BY u.id DESC"
 );
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -50,6 +58,17 @@ $users = mysqli_query($conn,
         <div class="col-md-4 mb-3">
             <input type="text" name="name" class="form-control" placeholder="Name" required>
         </div>
+        <div class="col-md-4 mb-3">
+    <select name="city_id" class="form-control" required>
+        <option value="">Select City</option>
+        <?php while($c = mysqli_fetch_assoc($cities)){ ?>
+            <option value="<?= $c['id']; ?>">
+                <?= htmlspecialchars($c['name']); ?>
+            </option>
+        <?php } ?>
+    </select>
+</div>
+
 
         <div class="col-md-4 mb-3">
             <input name="phone"
@@ -81,6 +100,7 @@ $users = mysqli_query($conn,
 <tr>
 <th>#</th>
 <th>Name</th>
+<th>City</th>
 <th>Phone</th>
 <th>Role</th>
 <th>Action</th>
@@ -92,6 +112,7 @@ $users = mysqli_query($conn,
 <tr>
 <td><?= $i++; ?></td>
 <td><?= htmlspecialchars($u['name']); ?></td>
+<td><?= htmlspecialchars($u['city_name']); ?></td>
 <td><?= htmlspecialchars($u['phone']); ?></td>
 <td><?= ucfirst($u['role']); ?></td>
 <td>

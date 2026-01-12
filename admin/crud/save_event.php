@@ -19,6 +19,8 @@ $center_id  = intval($_POST['center_id'] ?? 0);
 $start_date = trim($_POST['start_date'] ?? '');
 $end_date   = trim($_POST['end_date'] ?? '');
 $details    = trim($_POST['details'] ?? '');
+$link = trim($_POST['link'] ?? '');
+
 
 /* ================= VALIDATION ================= */
 if (empty($name) || empty($start_date) || empty($end_date) || $center_id <= 0) {
@@ -74,19 +76,20 @@ if (!empty($_FILES['photo']['name'])) {
 /* ================= INSERT DATA ================= */
 $sql = "
     INSERT INTO events 
-    (center_id, name, start_date, end_date, photo, details)
-    VALUES (?, ?, ?, ?, ?, ?)
+    (center_id, name, start_date, end_date, photo, link, details)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
 ";
 
 $stmt = mysqli_prepare($conn, $sql);
 mysqli_stmt_bind_param(
     $stmt,
-    "isssss",
+    "issssss",
     $center_id,
     $name,
     $start_date,
     $end_date,
     $photo_path,
+    $link,
     $details
 );
 

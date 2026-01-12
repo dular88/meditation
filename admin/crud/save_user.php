@@ -12,10 +12,17 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
 $name     = trim($_POST['name'] ?? '');
 $phone    = trim($_POST['phone'] ?? '');
 $password = trim($_POST['password'] ?? '');
+$city_id  = intval($_POST['city_id'] ?? 0);
 
 /* Validation */
 if ($name === '' || $password === '') {
     $_SESSION['error'] = "Name and password are required.";
+    header("Location: ../users.php");
+    exit;
+}
+
+if ($city_id <= 0) {
+    $_SESSION['error'] = "Please select a city.";
     header("Location: ../users.php");
     exit;
 }
@@ -45,13 +52,13 @@ $hash = password_hash($password, PASSWORD_BCRYPT);
 /* Insert user */
 $stmt = mysqli_prepare(
     $conn,
-    "INSERT INTO users (name, phone, password, role, created_at)
-     VALUES (?, ?, ?, ?, NOW())"
+    "INSERT INTO users (name, phone, city_id, password, role, created_at)
+     VALUES (?, ?, ?, ?, ?, NOW())"
 );
 
-mysqli_stmt_bind_param($stmt, "ssss", $name, $phone, $hash, $role);
+mysqli_stmt_bind_param($stmt, "ssiss", $name, $phone, $city_id, $hash, $role);
 
-/* ✅ EXECUTE ONLY ONCE */
+/* Execute once */
 if (mysqli_stmt_execute($stmt)) {
     $_SESSION['success'] = "User created successfully.";
     unset($_SESSION['error']);

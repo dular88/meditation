@@ -17,8 +17,14 @@
                 <li class="nav-item"><a class="nav-link active" href="index.php">Home</a></li>
                 <li class="nav-item"><a class="nav-link" href="meditation_centers.php">Meditation Centers</a></li>
                 <li class="nav-item"><a class="nav-link" href="events.php">Events</a></li>
+                <li class="nav-item"><a class="nav-link" href="donation.php">Donation</a></li>
                 <li class="nav-item"><a class="nav-link" href="books.php">Books</a></li>
                 <li class="nav-item"><a class="nav-link" href="meditators.php">Meditators</a></li>
+                <li class="nav-item"><a class="nav-link" href="vegetarianism.php">Vegetarianism</a></li>
+                <li class="nav-item"><a class="nav-link" href="satsang.php">Satsang</a></li>
+                <li class="nav-item"><a class="nav-link" href="swadhyay.php">Swadhyay</a></li>
+                <li class="nav-item"><a class="nav-link" href="seva.php">Seva</a></li>
+                
 
                 <li class="nav-item ms-lg-3">
                     <a class="btn btn-warning btn-sm" href="contact.php">Contact</a>

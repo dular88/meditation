@@ -80,8 +80,21 @@ while ($row = mysqli_fetch_assoc($res)) {
 
                 <div class="mb-3">
                     <label class="form-label">Event Photo</label>
-                    <input type="file" name="photo" class="form-control" accept="image/*" required>
+                    <input type="file" name="photo" class="form-control" accept="image/*" />
                 </div>
+                <div class="mb-3">
+    <label class="form-label">Event Link</label>
+    <input 
+        type="url" 
+        name="link" 
+        class="form-control" 
+        placeholder="https://example.com/event-page"
+    >
+    <small class="text-muted">
+        Optional: Add registration / YouTube / Google Meet / website link
+    </small>
+</div>
+
 
                 <div class="mb-3">
                     <label class="form-label">Event Details</label>
