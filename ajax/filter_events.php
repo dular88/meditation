@@ -1,19 +1,25 @@
 <?php
 include "../dbcon.php";
-
-$state_id   = isset($_POST['state_id']) ? (int)$_POST['state_id'] : 0;
 $city_id    = isset($_POST['city_id']) ? (int)$_POST['city_id'] : 0;
+$area_id    = isset($_POST['area_id']) ? (int)$_POST['area_id'] : 0;
 $event_type = $_POST['event_type'] ?? '';
+function seo_slug($string){
+    $string = strtolower($string);
+    $string = preg_replace('/[^a-z0-9\s-]/', '', $string);
+    $string = preg_replace('/\s+/', '-', $string);
+    return trim($string, '-');
+}
 
 $where = "WHERE 1";
 
-/* ================= STATE & CITY ================= */
-if ($state_id > 0) {
-    $where .= " AND mc.state_id = $state_id";
-}
+/* ================= CITY & AREA ================= */
 if ($city_id > 0) {
     $where .= " AND mc.city_id = $city_id";
 }
+if ($area_id > 0) {
+    $where .= " AND mc.area_id = $area_id";
+}
+
 
 /* ================= EVENT TYPE ================= */
 if ($event_type === "upcoming") {
@@ -34,12 +40,17 @@ SELECT
     e.start_date,
     e.end_date,
     e.photo,
-    mc.center_name
+    mc.center_name,
+    ci.name AS city,
+    ar.name AS area
 FROM events e
 JOIN meditation_centers mc ON mc.id = e.center_id
+JOIN cities ci ON ci.id = mc.city_id
+JOIN areas ar ON ar.id = mc.area_id
 $where
 ORDER BY e.start_date DESC
 ";
+
 
 $q = mysqli_query($conn, $sql);
 
@@ -49,6 +60,7 @@ if (!$q || mysqli_num_rows($q) === 0) {
 }
 
 while ($row = mysqli_fetch_assoc($q)) {
+    $event_slug = seo_slug($row['name']);
 ?>
 <div class="col-md-4 mb-4">
     <div class="card event-card shadow-sm h-100">
@@ -84,10 +96,9 @@ while ($row = mysqli_fetch_assoc($q)) {
         </div>
 
         <div class="card-footer bg-white border-0">
-            <a href="event-detail.php?id=<?= $row['id'] ?>"
-               class="btn btn-outline-success w-100">
-                View Details
-            </a>
+            <a href="event-detail.php?id=<?= $row['id'] ?>&event=<?= $event_slug ?>&city=<?= $row['city'] ?>"  class="btn btn-outline-success w-100">
+    View Details
+</a>
         </div>
 
     </div>

@@ -34,8 +34,8 @@
     <th>Center Name</th>
     <th>City</th>
     <th>Area</th>
-    <th>Contact</th>
     <th>Address</th>
+     <th>Contact</th>
     <th width="140">Actions</th>
 </tr>
 </thead>
@@ -172,8 +172,9 @@ function loadCenters() {
                 <td>${r.center_name}</td>
                 <td>${r.city}</td>
                 <td>${r.area}</td>
+                 <td>${r.address}</td>
                 <td>${r.contact_number}</td>
-                <td>${r.address}</td>
+               
                 <td>
     <button class="btn btn-sm btn-warning editBtn" data-id="${r.id}">
         Edit

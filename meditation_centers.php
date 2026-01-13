@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Meditation Centers | Ekta Pyramid Spiritual Trust</title>
+<title>Meditation Centers | Ekta Pyramid Spiritual Society</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link href="assets/dist/css/bootstrap.min.css" rel="stylesheet">

@@ -25,7 +25,17 @@ if(mysqli_num_rows($q)==0){
     exit;
 }
 
-while($row=mysqli_fetch_assoc($q)){ ?>
+function seo_slug($string){
+    $string = strtolower($string);
+    $string = preg_replace('/[^a-z0-9\s-]/', '', $string);
+    $string = preg_replace('/\s+/', '-', $string);
+    return trim($string, '-');
+}
+
+
+while($row=mysqli_fetch_assoc($q)){ 
+       $slug = seo_slug($row['center_name']);
+ ?>
 
 <div class="col-md-4 mb-4">
   <div class="card shadow-sm h-100">
@@ -42,7 +52,7 @@ while($row=mysqli_fetch_assoc($q)){ ?>
         <?php if($row['youtube_url']){ ?>
           <a href="<?= $row['youtube_url'] ?>" target="_blank" class="btn btn-sm btn-outline-danger">YouTube</a>
         <?php } ?>
-        <a href="meditation-center-detail.php?id=<?= $row['id'] ?>"
+       <a href="meditation-center-detail.php?id=<?= $row['id'] ?>&name=<?= $slug ?>&city=<?= $row['city'] ?>"
    class="btn btn-sm btn-success">
    View Details
 </a>
